@@ -13,9 +13,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(myMap);
 
-// Define marker size based on the magnitude of the earthquake
+// Define circle size with earthquake magnitude.
 function markerSize(magnitude) {
-    return Math.sqrt(magnitude) * 50;
+    // return Math.sqrt(Math.abs(magnitude)) * 60000;
+    return magnitude * 20000;
 }
 
 // Retrieve the geoJSON dataset using d3 and add markers and popups
@@ -31,15 +32,13 @@ d3.json(geoData).then(function(data) {
         var geoTitle = data["features"][i]["properties"]["title"];
         // console.log(`Magnitude ${geoMag} Depth ${geoDepth} Coord: ${geoLat}, ${geoLon} ${geoTitle}`)
         console.log(i, geoMag, geoTitle);
-        // Define markers and their sizes
+
+        // Define circle markers and their sizes
         var marker = L.circle([geoLat, geoLon], {
             title: "Earthquakes past 7 days",
             radius: markerSize(geoMag)
         }).addTo(myMap);
         marker.bindPopup(`<h2>${geoTitle}</h2> <hr> <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`);
         
-        // L.marker([geoLat, geoLon])
-        //     .bindPopup(`<h2>${geoTitle}</h2> <hr> <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`)
-        //     .addTo(myMap);
     }
 });
