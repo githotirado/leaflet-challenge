@@ -19,6 +19,13 @@ function markerSize(magnitude) {
     return magnitude * 20000;
 }
 
+function chooseColor(depth) {
+    if (depth > 80) return "red";
+    else if (depth > 60) return "orange";
+    else if (depth > 40) return "yellow";
+    else return "lightgreen";
+}
+
 // Retrieve the geoJSON dataset using d3 and add markers and popups
 d3.json(geoData).then(function(data) {
     console.log([data]);
@@ -31,14 +38,66 @@ d3.json(geoData).then(function(data) {
         var geoMag   = data["features"][i]["properties"]["mag"];
         var geoTitle = data["features"][i]["properties"]["title"];
         // console.log(`Magnitude ${geoMag} Depth ${geoDepth} Coord: ${geoLat}, ${geoLon} ${geoTitle}`)
-        console.log(i, geoMag, geoTitle);
+        // console.log(i, geoMag, geoTitle);
 
-        // Define circle markers and their sizes
+        // Define circle markers, their colors and their sizes
         var marker = L.circle([geoLat, geoLon], {
             title: "Earthquakes past 7 days",
+            fillColor: chooseColor(geoDepth),
+            fillOpacity: 0.8,
             radius: markerSize(geoMag)
         }).addTo(myMap);
         marker.bindPopup(`<h2>${geoTitle}</h2> <hr> <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`);
         
     }
+
+    // Set up the legend
+    // var legend = L.control({ position: "bottomright" });
+
+    // legend.onAdd = function() {
+    //     var div = L.DomUtil.create("div", "info legend");
+    //     var limits = geojson.options.limits;
+    //     var colors = geojson.options.colors;
+    //     var labels = [];
+
+    //     var lowerLimit = limits[0];
+    //     var upperLimit = limits[limits.length - 1];
+    //     var legendInfo = "<h3>Alternative Vehicle Count<br>by County: " + carMake + "</h3>" +
+    //         "<div class=\"labels\">" +
+    //         "<div class=\"min\">" + lowerLimit + "</div>" +
+    //         "<div class=\"max\">" + upperLimit + "</div>" +
+    //         "</div>";
+
+    //     div.innerHTML = legendInfo;
+
+    //     limits.forEach(function(limit, index) {
+    //         labels.push("<li style=\"background-color: " + colors[index] + "\"></li>");
+    //     });
+
+    //     div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+    //     return div;
+    // };
+
+    // var legend = L.control({position: 'bottomleft'});
+    // legend.onAdd = function (map) {
+
+    //     var div = L.DomUtil.create('div', 'info legend');
+    //     labels = ['<strong>Categories</strong>'],
+    //     categories = ['Road Surface','Signage','Line Markings','Roadside Hazards','Other'];
+
+    //     for (var i = 0; i < categories.length; i++) {
+
+    //         div.innerHTML += 
+    //         labels.push(
+    //             '<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' +
+    //         (categories[i] ? categories[i] : '+'));
+
+    //     }
+    //     div.innerHTML = labels.join('<br>');
+    //     return div;
+    // };
+    // // legend.addTo(map);
+    
+    // // Add the legend to the map
+    // legend.addTo(myMap);
 });
