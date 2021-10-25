@@ -11,5 +11,5 @@ tectonicData = "static/data/PB2002_plates.json"
 # Observations
 Over the past 7 days there have been numerous small quakes in the Alaska region, the western continental US, and along the western Pacific islands.  The tectonics overlay helps one notice that the Pacific plate is the most active in terms of earthquakes; other plates are not as active.  Larger magnitude quakes were concentrated around the Alaska region while the deeper quakes have occurred along the western pacific island regions.
 
-# Operatoin
-The base layers and overlay layers are all operational.  One base layer can be selected at a time, but both the earthquake and tectonic layers can be toggled.
+# Operation
+The base layers and overlay layers are all operational. For all functions, use the index.html file in the Leaflet-Step-2/ folder.  One base layer can be selected at a time, but both the earthquake and tectonic layers can be toggled.

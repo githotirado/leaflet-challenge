@@ -39,14 +39,12 @@ function chooseColor(depth) {
 
 // Retrieve the geoJSON dataset using d3
 d3.json(geoData).then(function(data) {
-    console.log([data]);
+    // console.log([data]);
     // Read in the plate tectonics geometry using d3
     d3.json(tectonicData).then(function(tectoData) {
-        console.log(tectoData);
+        // console.log(tectoData);
     
-
         // Parse through the geoJSON data and add the markers
-
         var quakeMarkers = [];
         for (let i = 0; i < data["features"].length; i++) {
             var geoLon   = data["features"][i]["geometry"]["coordinates"][0];
@@ -54,6 +52,7 @@ d3.json(geoData).then(function(data) {
             var geoDepth = data["features"][i]["geometry"]["coordinates"][2];
             var geoMag   = data["features"][i]["properties"]["mag"];
             var geoTitle = data["features"][i]["properties"]["title"];
+            var geoDate  = Date(data["features"][i]["properties"]["time"]);
             // console.log(`Magnitude ${geoMag} Depth ${geoDepth} Coord: ${geoLat}, ${geoLon} ${geoTitle}`)
 
             // Define circle markers, their colors, popups and sizes into an array
@@ -64,7 +63,9 @@ d3.json(geoData).then(function(data) {
                         fillOpacity: 0.8,
                         radius: markerSize(geoMag)
                     }
-                ).bindPopup(`<h2>${geoTitle}</h2> <hr> <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`)
+                ).bindPopup(`<h2>${geoTitle}</h2> <hr> 
+                            <h3>Time: ${geoDate}</h3>
+                            <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`)
             );
         }
 
@@ -93,53 +94,23 @@ d3.json(geoData).then(function(data) {
         L.control.layers(baseMaps, overlayMaps).addTo(myMap);
 
         // Set up the legend
-        // var legend = L.control({ position: "bottomright" });
+        var legend = L.control({position: 'bottomright'});
 
-        // legend.onAdd = function() {
-        //     var div = L.DomUtil.create("div", "info legend");
-        //     var limits = geojson.options.limits;
-        //     var colors = geojson.options.colors;
-        //     var labels = [];
-
-        //     var lowerLimit = limits[0];
-        //     var upperLimit = limits[limits.length - 1];
-        //     var legendInfo = "<h3>Alternative Vehicle Count<br>by County: " + carMake + "</h3>" +
-        //         "<div class=\"labels\">" +
-        //         "<div class=\"min\">" + lowerLimit + "</div>" +
-        //         "<div class=\"max\">" + upperLimit + "</div>" +
-        //         "</div>";
-
-        //     div.innerHTML = legendInfo;
-
-        //     limits.forEach(function(limit, index) {
-        //         labels.push("<li style=\"background-color: " + colors[index] + "\"></li>");
-        //     });
-
-        //     div.innerHTML += "<ul>" + labels.join("") + "</ul>";
-        //     return div;
-        // };
-
-        // var legend = L.control({position: 'bottomleft'});
-        // legend.onAdd = function (map) {
-
-        //     var div = L.DomUtil.create('div', 'info legend');
-        //     labels = ['<strong>Categories</strong>'],
-        //     categories = ['Road Surface','Signage','Line Markings','Roadside Hazards','Other'];
-
-        //     for (var i = 0; i < categories.length; i++) {
-
-        //         div.innerHTML += 
-        //         labels.push(
-        //             '<i class="circle" style="background:' + getColor(categories[i]) + '"></i> ' +
-        //         (categories[i] ? categories[i] : '+'));
-
-        //     }
-        //     div.innerHTML = labels.join('<br>');
-        //     return div;
-        // };
-        // // legend.addTo(map);
+        legend.onAdd = function() {
         
-        // // Add the legend to the map
-        // legend.addTo(myMap);
+            var div = L.DomUtil.create('div', 'info legend');
+            // magnitudes = [0, 1, 2, 3, 4, 5];
+            magnitudes = [0, 10, 30, 60, 80];
+        
+            for (var i = 0; i < magnitudes.length; i++) {
+                div.innerHTML +=
+                    '<i style="background: ' + chooseColor(magnitudes[i] + 1) + '"></i> ' + 
+            + magnitudes[i] + (magnitudes[i + 1] ? ' - ' + magnitudes[i + 1] + '<br>' : ' + ');
+            }
+        
+            return div;
+        };
+        
+        legend.addTo(myMap);
     });
 });
