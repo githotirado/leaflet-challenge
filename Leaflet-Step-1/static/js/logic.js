@@ -21,8 +21,9 @@ function markerSize(magnitude) {
 
 function chooseColor(depth) {
     if (depth > 80) return "red";
-    else if (depth > 60) return "orange";
-    else if (depth > 40) return "yellow";
+    else if (depth > 60) return "tomato";
+    else if (depth > 30) return "orange";
+    else if (depth > 10) return "yellow";
     else return "lightgreen";
 }
 

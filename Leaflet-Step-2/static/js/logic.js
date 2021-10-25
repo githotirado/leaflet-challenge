@@ -1,15 +1,8 @@
-// Create the map object, center it in the US
-var myMap = L.map("map", {
-    center: [37.09, -95.71],
-    zoom: 4,
-    // layers: [street]
-    }
-);
-  
-// Prepare to load the geoJSON data.  Select geodata from past 7 days
+// Identify the geoJSON data.  Select geodata from past 7 days
 var geoData = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson";
+// var tectonicData = "https://github.com/fraxen/tectonicplates/blob/master/GeoJSON/PB2002_plates.json";
 
-// Define variables for our tile layers.
+// Define variables for our base tile layers.
 var street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
@@ -22,22 +15,12 @@ var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/service
     attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
 })
 
-L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-}).addTo(myMap);
-
-// Only one base layer can be shown at a time.
+// Our set of base maps
 var baseMaps = {
   Street: street,
   Topography: topo,
   Satellite: satellite
 };
-
-// Pass our map layers into our layer control.
-// Add the layer control to the map.
-// L.control.layers(baseMaps, overlayMaps).addTo(myMap);
-// L.control.layers(baseMaps).addTo(myMap);
-
 
 // Define circle size with earthquake magnitude.
 function markerSize(magnitude) {
@@ -45,18 +28,25 @@ function markerSize(magnitude) {
     return magnitude * 20000;
 }
 
+// Define circle colors light to dark based on depth low to high
 function chooseColor(depth) {
     if (depth > 80) return "red";
-    else if (depth > 60) return "orange";
-    else if (depth > 40) return "yellow";
+    else if (depth > 60) return "tomato";
+    else if (depth > 30) return "orange";
+    else if (depth > 10) return "yellow";
     else return "lightgreen";
 }
 
-// Retrieve the geoJSON dataset using d3 and add markers and popups
+// Retrieve the geoJSON dataset using d3
 d3.json(geoData).then(function(data) {
     console.log([data]);
+    // d3.json(tectonicData).then(function(d) {
+    //     console.log(d);
+    // });
 
     // Parse through the geoJSON data and add the markers
+
+    var quakeMarkers = [];
     for (let i = 0; i < data["features"].length; i++) {
         var geoLon   = data["features"][i]["geometry"]["coordinates"][0];
         var geoLat   = data["features"][i]["geometry"]["coordinates"][1];
@@ -64,18 +54,37 @@ d3.json(geoData).then(function(data) {
         var geoMag   = data["features"][i]["properties"]["mag"];
         var geoTitle = data["features"][i]["properties"]["title"];
         // console.log(`Magnitude ${geoMag} Depth ${geoDepth} Coord: ${geoLat}, ${geoLon} ${geoTitle}`)
-        // console.log(i, geoMag, geoTitle);
 
-        // Define circle markers, their colors and their sizes
-        var marker = L.circle([geoLat, geoLon], {
-            title: "Earthquakes past 7 days",
-            fillColor: chooseColor(geoDepth),
-            fillOpacity: 0.8,
-            radius: markerSize(geoMag)
-        }).addTo(myMap);
-        marker.bindPopup(`<h2>${geoTitle}</h2> <hr> <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`);
-        
+        // Define circle markers, their colors, popups and sizes into an array
+        quakeMarkers.push(
+            L.circle([geoLat, geoLon], {
+                    title: "Earthquakes past 7 days",
+                    fillColor: chooseColor(geoDepth),
+                    fillOpacity: 0.8,
+                    radius: markerSize(geoMag)
+                }).bindPopup(`<h2>${geoTitle}</h2> <hr> <h3>Depth: ${geoDepth} Magnitude: ${geoMag}</h3>`)
+        );
     }
+
+    // Create layer group using the quakeMarkers array
+    var quakeLayer = L.layerGroup(quakeMarkers);
+
+    // Define overlayMaps (toggle on/off)
+    var overlayMaps = {
+        Earthquakes: quakeLayer
+    };
+
+    // Create the map object, center it in the US, provide base and overlay layers
+    var myMap = L.map("map", {
+        center: [37.09, -95.71],
+        zoom: 4,
+        layers: [satellite, quakeLayer]
+        }
+    );
+
+    // Pass our map layers into our layer control.
+    // Add the layer control to the map.
+    L.control.layers(baseMaps, overlayMaps).addTo(myMap);
 
     // Set up the legend
     // var legend = L.control({ position: "bottomright" });
