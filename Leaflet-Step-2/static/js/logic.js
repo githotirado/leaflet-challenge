@@ -85,7 +85,7 @@ d3.json(geoData).then(function(data) {
         var myMap = L.map("map", {
             center: [37.09, -95.71],
             zoom: 4,
-            layers: [satellite, quakeLayer]
+            layers: [satellite, quakeLayer, tectonicPlates]
             }
         );
 
